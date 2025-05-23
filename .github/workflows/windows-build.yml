@@ -1,0 +1,30 @@
+name: Build Windows App with Microsoft Graph
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Add Microsoft Graph packages
+        run: |
+          dotnet add MyApp.csproj package Microsoft.Graph
+          dotnet add MyApp.csproj package Microsoft.Identity.Client
+      - name: Build app
+        run: dotnet build MyApp.csproj --configuration Release
+      - name: Publish app
+        run: dotnet publish MyApp.csproj -c Release -o ./publish
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-app
+          path: ./publish
